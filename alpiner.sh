@@ -35,7 +35,7 @@ for input in $(cat repos.config); do
     # Make sure we can checkout the new branch
     if [ "$?" = 0 ]; then
       # Replace alpine version with passed variable
-      sed -ri "/^FROM lsiobase.*/{s/...$/${ALPINE_VERSION}/}" Dockerfile*
+      sed -ri "/^FROM lsiobase\/alpine.*/{s/:[0-9]\.[0-9]/:${ALPINE_VERSION}/}" Dockerfile*
       # Build local x86 variant
       echo "docker building ${repo}-${branch}-${ALPINE_VERSION}"
       docker build --no-cache -t ${repo}-${ALPINE_VERSION} . > ../dockerout/${repo}-${branch}-${ALPINE_VERSION}.txt
