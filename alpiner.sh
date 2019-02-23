@@ -19,6 +19,9 @@ case $i in
 esac
 done
 
+## Set timestamp for readme
+TIMESTAMP=$(date +%d.%m.%y)
+
 ## Main loop
 IFS=$'\n' 
 for input in $(cat repos.config); do
@@ -36,6 +39,10 @@ for input in $(cat repos.config); do
     if [ "$?" = 0 ]; then
       # Replace alpine version with passed variable
       sed -ri "/^FROM lsiobase\/alpine.*/{s/:[0-9]\.[0-9]/:${ALPINE_VERSION}/}" Dockerfile*
+      # Add to readme
+      sed -i "1,/date: \"[0-9][0-9].[0-9][0-9].[0-9][0-9]:/ {/date: \"[0-9][0-9].[0-9][0-9].[0-9][0-9]:/i\
+      \  - { date: \"${TIMESTAMP}:\", desc: \"Rebasing to alpine ${ALPINE_VERSION}.\" }
+      }" readme-vars.yml
       # Build local x86 variant
       echo "docker building ${repo}-${branch}-${ALPINE_VERSION}"
       docker build --no-cache -t ${repo}-${ALPINE_VERSION} . > ../dockerout/${repo}-${branch}-${ALPINE_VERSION}.txt
@@ -48,6 +55,7 @@ for input in $(cat repos.config); do
         else
           # Commit and push new branch
           git add Dockerfile*
+          git add readme-vars.yml
           git commit -m "Rebasing to Alpine ${ALPINE_VERSION}"
           git push origin ${branch}-${ALPINE_VERSION}
         fi
